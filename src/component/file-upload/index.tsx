@@ -5,50 +5,8 @@ import { useState, useCallback } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useDropzone } from "react-dropzone";
 import { cn } from "./lib/utils";
+import { FileItem, FileUploadProps, fileUploadVariants, formatFileSize } from "./types";
 
-const fileUploadVariants = cva(
-  "relative rounded-lg text-center",
-  {
-    variants: {
-      variant: {
-        button: "inline-flex flex-col items-center",
-        preview: "p-4 border border-dashed border-gray-300",
-        multiple: "p-4 border border-dashed border-gray-300",
-        dropzone: "p-4",
-      },
-      size: {
-        default: "max-w-2xs",
-        sm: "max-w-xs",
-        lg: "max-w-md",
-      },
-    },
-    defaultVariants: {
-      variant: "preview",
-      size: "default",
-    },
-  }
-);
-
-export interface FileUploadProps extends VariantProps<typeof fileUploadVariants> {
-  className?: string;
-  accept?: string;
-  maxSizeInMB?: number;
-  buttonText?: string;
-  title?: string;
-  onFileChange?: (file: File | null) => void;
-  onFilesChange?: (files: File[]) => void;
-  onImageChange?: (imageUrl: string | null) => void;
-  multiple?: boolean;
-}
-
-export interface FileItem {
-  file: File;
-  id: string;
-  name: string;
-  size: string;
-  type: string;
-  url?: string;
-}
 
 export const FileUpload = ({
   variant,
@@ -332,13 +290,6 @@ export const FileUpload = ({
       
       return updatedFiles;
     });
-  };
-
-  // Format file size to human-readable format
-  const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return bytes + ' bytes';
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    else return (bytes / 1048576).toFixed(1) + ' MB';
   };
 
   // Get appropriate icon based on file type
