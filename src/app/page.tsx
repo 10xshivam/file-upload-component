@@ -4,7 +4,7 @@ import React from "react";
 
 export default function Home() {
   return (
-    <div className="w-full min-h-screen bg-white flex items-center justify-center">
+    <div className="w-full min-h-screen bg-black flex items-center justify-center">
       {/* // Simple button uploader */}
       {/* <FileUpload
         variant="button"
@@ -31,12 +31,31 @@ export default function Home() {
       /> */}
 
       {/* // Drag and drop uploader */}
-      <FileUpload
+      {/* <FileUpload
         variant="dropzone"
         title="Upload PDF"
         accept=".pdf,application/pdf"
         maxSizeInMB={10}
         onFileChange={(files) => console.log(files)}
+      /> */}
+
+      <FileUpload
+        variant="dropzone"
+        size="lg"
+        radius="lg"
+        borderStyle="dotted"
+        iconPlacement="left"
+        iconSize="lg"
+        colorScheme="light"
+        padding="lg"
+        customColors={{
+          primary: "text-neutral-600",
+          border: "border-neutral-700",
+          hover: "hover:bg-neutral-800",
+        }}
+        accept="image/*"
+        maxSizeInMB={10}
+        onFileChange={(file) => console.log(file)}
       />
     </div>
   );

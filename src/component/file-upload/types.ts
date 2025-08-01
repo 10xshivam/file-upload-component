@@ -35,6 +35,20 @@ export interface FileUploadProps extends VariantProps<typeof fileUploadVariants>
   onFilesChange?: (files: File[]) => void;
   onImageChange?: (imageUrl: string | null) => void;
   multiple?: boolean;
+  // New theme props
+  radius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'none';
+  iconPlacement?: 'left' | 'right' | 'top';
+  iconSize?: 'sm' | 'md' | 'lg';
+  colorScheme?: 'light' | 'dark' | 'system' | 'custom';
+  customColors?: {
+    primary?: string;
+    border?: string;
+    text?: string;
+    background?: string;
+    hover?: string;
+  };
+  padding?: 'sm' | 'md' | 'lg';
 }
 
 // File item structure for multiple files

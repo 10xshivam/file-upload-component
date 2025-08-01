@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState, useCallback } from "react";
-import { cva, type VariantProps } from "class-variance-authority";
 import { useDropzone } from "react-dropzone";
 import { cn } from "./lib/utils";
 import { FileItem, FileUploadProps, fileUploadVariants, formatFileSize } from "./types";
@@ -10,7 +9,7 @@ import { FileItem, FileUploadProps, fileUploadVariants, formatFileSize } from ".
 
 export const FileUpload = ({
   variant,
-  size,
+  size ,
   className,
   accept = "*/*",
   maxSizeInMB = 5,
@@ -20,6 +19,14 @@ export const FileUpload = ({
   onFilesChange,
   onImageChange,
   multiple = false,
+  // New theme props with defaults
+  radius = "md",
+  borderStyle = "dashed",
+  iconPlacement = "top",
+  iconSize = "md",
+  colorScheme = "light",
+  customColors = {},
+  padding = "md",
 }: FileUploadProps) => {
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -323,13 +330,93 @@ export const FileUpload = ({
     }
   };
 
+  // Build theme-based styles
+  const getThemeStyles = () => {
+    // Border radius styles
+    const radiusStyles = {
+      'none': 'rounded-none',
+      'sm': 'rounded',
+      'md': 'rounded-md',
+      'lg': 'rounded-lg',
+      'full': 'rounded-full',
+    }[radius];
+
+    // Border style
+    const borderStyles = {
+      'solid': 'border-solid',
+      'dashed': 'border-dashed',
+      'dotted': 'border-dotted',
+      'none': 'border-none',
+    }[borderStyle];
+
+    // Padding
+    const paddingStyles = {
+      'sm': 'p-2',
+      'md': 'p-4',
+      'lg': 'p-6',
+    }[padding];
+
+    // Icon size
+    const iconSizeStyles = {
+      'sm': 'w-6 h-6',
+      'md': 'w-8 h-8',
+      'lg': 'w-10 h-10',
+    }[iconSize];
+
+    // Color scheme
+    const isDark = colorScheme === 'dark' || 
+      (colorScheme === 'system' && typeof window !== 'undefined' && 
+       window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    const colors = {
+      border: customColors.border || (isDark ? 'border-gray-600' : 'border-gray-300'),
+      text: customColors.text || (isDark ? 'text-gray-200' : 'text-gray-500'),
+      background: customColors.background || (isDark ? 'bg-gray-800' : 'bg-white'),
+      hover: customColors.hover || (isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'),
+      primary: customColors.primary || (isDark ? 'text-blue-400' : 'text-blue-500'),
+    };
+
+    return {
+      radiusStyles,
+      borderStyles,
+      paddingStyles,
+      iconSizeStyles,
+      colors,
+    };
+  };
+
+  const themeStyles = getThemeStyles();
+
+  // Helper for icon placement
+  const renderIcon = (icon: React.ReactNode) => {
+    const flexDirection = {
+      'left': 'flex-row',
+      'right': 'flex-row-reverse',
+      'top': 'flex-col',
+    }[iconPlacement];
+
+    return (
+      <div className={`flex items-center ${flexDirection} gap-2`}>
+        <div className={themeStyles.iconSizeStyles}>
+          {icon}
+        </div>
+        <div>
+          <p className={`text-sm ${themeStyles.colors.text}`}>
+            {iconPlacement === 'top' ? 'Click to upload or drag and drop' : buttonText}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">Maximum file size: {maxSizeInMB}MB</p>
+        </div>
+      </div>
+    );
+  };
+
   // Dropzone variant
   if (variant === "dropzone") {
     const dropzoneClasses = cn(
-      "w-full border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center transition-colors",
+      `w-full border-2 ${themeStyles.borderStyles} ${themeStyles.radiusStyles} ${themeStyles.paddingStyles} flex flex-col items-center justify-center transition-colors`,
       isDragAccept && "border-green-500 bg-green-50",
       isDragReject && "border-red-500 bg-red-50",
-      isDragActive ? "border-blue-400 bg-blue-50" : "border-gray-300 hover:bg-gray-50"
+      isDragActive ? `border-blue-400 bg-blue-50` : `${themeStyles.colors.border} ${themeStyles.colors.hover}`
     );
 
     return (
@@ -341,39 +428,37 @@ export const FileUpload = ({
           
           {isDragActive ? (
             <div className="text-center">
-              <svg className="w-10 h-10 text-blue-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <svg className={`${themeStyles.iconSizeStyles} text-blue-500 mx-auto mb-2`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
               </svg>
               <p className="text-sm text-blue-500">Drop {multiple ? 'files' : 'file'} here...</p>
             </div>
           ) : (
-            <div className="text-center">
-              <svg className="w-10 h-10 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            renderIcon(
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
               </svg>
-              <p className="text-sm text-gray-500">Drag & drop {multiple ? 'files' : 'a file'} here, or click to select</p>
-              <p className="text-xs text-gray-400 mt-1">Maximum file size: {maxSizeInMB}MB</p>
-            </div>
+            )
           )}
         </div>
         
         {/* Error message */}
         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         
-        {/* File display section */}
+        {/* File display section with themed styling */}
         {multiple ? (
           // Multiple files preview
           files.length > 0 && (
             <div className="mt-4 w-full">
-              <p className="text-sm font-medium text-gray-700 mb-2">Files ({files.length}):</p>
+              <p className={`text-sm font-medium ${themeStyles.colors.text} mb-2`}>Files ({files.length}):</p>
               <div className="space-y-2">
                 {files.map((file) => (
-                  <div key={file.id} className="flex items-center p-2 bg-gray-50 rounded-md border border-gray-200">
+                  <div key={file.id} className={`flex items-center p-2 ${themeStyles.colors.background} ${themeStyles.radiusStyles} border ${themeStyles.borderStyles === 'none' ? '' : themeStyles.borderStyles} ${themeStyles.colors.border}`}>
                     <div className="mr-2">
                       {getFileIcon(file.type)}
                     </div>
                     <div className="flex-1 truncate">
-                      <p className="text-sm font-medium text-gray-700 truncate" title={file.name}>
+                      <p className={`text-sm font-medium ${themeStyles.colors.text} truncate`} title={file.name}>
                         {file.name}
                       </p>
                       <p className="text-xs text-gray-500">{file.size}</p>
