@@ -103,6 +103,49 @@ export default function Home() {
   const [uploadResults, setUploadResults] = useState<
     Array<{ url: string; fileName: string }>
   >([]);
+  
+  // New state variables for the live config editor
+  const [liveConfig, setLiveConfig] = useState<string>(JSON.stringify(buttonConfig, null, 2));
+  const [validConfig, setValidConfig] = useState<string>(JSON.stringify(buttonConfig));
+  const [configError, setConfigError] = useState<string | null>(null);
+
+  // Function to handle configuration changes
+  const handleConfigChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newConfig = e.target.value;
+    setLiveConfig(newConfig);
+    
+    try {
+      // Validate that the JSON is properly formatted
+      JSON.parse(newConfig);
+      setValidConfig(newConfig);
+      setConfigError(null);
+    } catch (error) {
+      setConfigError("Invalid JSON: " + (error as Error).message);
+    }
+  };
+  
+  // Load preset configurations
+  const loadPreset = (type: 'button' | 'preview' | 'multiple' | 'dropzone') => {
+    let config;
+    switch (type) {
+      case 'button':
+        config = buttonConfig;
+        break;
+      case 'preview':
+        config = previewConfig;
+        break;
+      case 'multiple':
+        config = multipleConfig;
+        break;
+      case 'dropzone':
+        config = dropzoneConfig;
+        break;
+    }
+    const formattedConfig = JSON.stringify(config, null, 2);
+    setLiveConfig(formattedConfig);
+    setValidConfig(formattedConfig);
+    setConfigError(null);
+  };
 
   const handleFileUpload = async (file: File | null) => {
     if (!file) {
@@ -216,6 +259,69 @@ export default function Home() {
               config={JSON.stringify(dropzoneConfig)}
               onFilesChange={handleFilesUpload}
             />
+          </div>
+        </div>
+
+        {/* Live Config Editor */}
+        <div className="mt-12 bg-white p-6 rounded-xl shadow-md">
+          <h2 className="text-2xl font-semibold mb-6">Live Config Editor</h2>
+          <p className="text-gray-600 mb-4">
+            Edit the JSON configuration below to see the component update in real-time.
+          </p>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-lg font-medium mb-3">JSON Configuration</h3>
+              <textarea
+                className="w-full h-96 p-4 font-mono text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={liveConfig}
+                onChange={handleConfigChange}
+                spellCheck="false"
+              />
+              {configError && (
+                <p className="mt-2 text-red-600 text-sm">{configError}</p>
+              )}
+              <div className="mt-2 flex space-x-2">
+                <button
+                  onClick={() => loadPreset('button')}
+                  className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md"
+                >
+                  Button Preset
+                </button>
+                <button
+                  onClick={() => loadPreset('preview')}
+                  className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md"
+                >
+                  Preview Preset
+                </button>
+                <button
+                  onClick={() => loadPreset('multiple')}
+                  className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md"
+                >
+                  Multiple Preset
+                </button>
+                <button
+                  onClick={() => loadPreset('dropzone')}
+                  className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md"
+                >
+                  Dropzone Preset
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-medium mb-3">Live Preview</h3>
+              <div className="p-4 border border-gray-300 rounded-lg min-h-[300px] bg-gray-50">
+                {validConfig && (
+                  <FileUpload
+                    config={validConfig}
+                    onFileChange={handleFileUpload}
+                    onFilesChange={handleFilesUpload}
+                    onImageChange={(imageUrl) => console.log(imageUrl)}
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
