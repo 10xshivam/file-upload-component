@@ -49,6 +49,7 @@ export interface FileUploadProps extends VariantProps<typeof fileUploadVariants>
     hover?: string;
   };
   padding?: 'sm' | 'md' | 'lg';
+  config?: FileUploadConfig | string; // Can be JSON string or object
 }
 
 // File item structure for multiple files
@@ -67,3 +68,45 @@ export const formatFileSize = (bytes: number): string => {
   else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
   else return (bytes / 1048576).toFixed(1) + ' MB';
 };
+
+export interface FileUploadConfig {
+  // Default variant settings
+  variant?: 'dropzone' | 'multiple' | 'button' | 'preview';
+  
+  // File constraints
+  fileConstraints?: {
+    maxSizeInMB?: number;
+    acceptedTypes?: string; // MIME types or extensions separated by commas
+    multiple?: boolean;
+  };
+  
+  // Style presets
+  stylePreset?: {
+    theme?: 'light' | 'dark' | 'system';
+    size?: 'sm' | 'md' | 'lg';
+    radius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+    borderStyle?: 'solid' | 'dashed' | 'dotted' | 'none';
+    iconPlacement?: 'top' | 'left' | 'right';
+    iconSize?: 'sm' | 'md' | 'lg';
+    padding?: 'sm' | 'md' | 'lg';
+    customColors?: {
+      border?: string;
+      text?: string;
+      background?: string;
+      hover?: string;
+      primary?: string;
+    };
+  };
+  
+  // Text content
+  text?: {
+    title?: string;
+    buttonText?: string;
+    dragDropText?: string;
+    maxFileSizeText?: string;
+    removeFileText?: string;
+    previewText?: string;
+    errorSizeExceeded?: string;
+    filesCountText?: string;
+  };
+}
