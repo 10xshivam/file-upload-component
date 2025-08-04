@@ -8,21 +8,51 @@ import {
 import React, { useState } from "react";
 
 // Button variant configuration
+// const buttonConfig = {
+//   variant: "button",
+//   text: {
+//     buttonText: "Upload File",
+//     title: "Simple Button Uploader",
+//   },
+//   stylePreset: {
+//     theme: "light",
+//     size: "md",
+//     radius: "lg",
+//     customColors: {
+//       primary: "text-blue-600",
+//     },
+//   },
+// };
+
 const buttonConfig = {
-  variant: "button",
-  text: {
-    buttonText: "Upload File",
-    title: "Simple Button Uploader",
-  },
-  stylePreset: {
-    theme: "light",
-    size: "md",
-    radius: "md",
-    customColors: {
-      primary: "text-blue-600",
+    variant: "button",
+    fileConstraints: {
+      maxSizeInMB: 5,
+      acceptedTypes: "image/*, .pdf, .docx",
+      multiple: true,
     },
-  },
-};
+    stylePreset: {
+      theme: "light",
+      radius: "full",
+      borderStyle: "dashed",
+      iconPlacement: "left",
+      iconSize: "lg",
+      padding: "lg",
+      customColors: {
+        // primary: "text-yellow-500 border-purple-500",
+        border: "border-purple-400",
+        text: "text-purple-200",
+        background: "bg-purple-900",
+        hover: "hover:bg-purple-800",
+      },
+    },
+    text: {
+      title: "Upload Documents",
+      buttonText: "Choose Files",
+      dragDropText: "Drag and drop your files here",
+      maxFileSizeText: "Max size: 5MB per file",
+    },
+  };
 
 // Preview variant configuration
 const previewConfig = {
@@ -37,7 +67,7 @@ const previewConfig = {
   },
   stylePreset: {
     size: "lg",
-    theme: "light",
+    theme: "dark",
     radius: "md",
   },
 };
@@ -215,7 +245,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-black py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-12">
           FileUpload Component Variants

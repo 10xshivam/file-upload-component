@@ -12,25 +12,55 @@ import {
   FileUploadConfig,
 } from "./types";
 
+// Default configuration object
+const DEFAULT_CONFIG: FileUploadConfig = {
+  variant: "dropzone",
+  fileConstraints: {
+    maxSizeInMB: 5,
+    acceptedTypes: "*/*",
+    multiple: false,
+  },
+  stylePreset: {
+    size: "md",
+    radius: "md",
+    borderStyle: "dashed",
+    iconPlacement: "top",
+    iconSize: "md",
+    theme: "light",
+    customColors: {},
+    padding: "md",
+  },
+  text: {
+    title: "Upload a File",
+    buttonText: "Choose File",
+    dragDropText: "Click to upload or drag and drop",
+    maxFileSizeText: "Maximum file size: 5MB",
+    removeFileText: "Remove file",
+    previewText: "Preview:",
+    errorSizeExceeded: "File size must be less than 5MB",
+    filesCountText: "Files",
+  },
+};
+
 export const FileUpload = ({
   variant,
   size,
   className,
-  accept = "*/*",
-  maxSizeInMB = 5,
-  buttonText = "Choose File",
-  title = "Upload a File",
+  accept,
+  maxSizeInMB,
+  buttonText,
+  title,
   onFileChange,
   onFilesChange,
   onImageChange,
-  multiple = false,
-  radius = "md",
-  borderStyle = "dashed",
-  iconPlacement = "top",
-  iconSize = "md",
-  colorScheme = "light",
+  multiple,
+  radius,
+  borderStyle,
+  iconPlacement,
+  iconSize,
+  colorScheme,
   customColors = {},
-  padding = "md",
+  padding,
   config,
 }: FileUploadProps) => {
   // Process config - handle both string and object formats
@@ -49,47 +79,81 @@ export const FileUpload = ({
     return config as FileUploadConfig;
   }, [config]);
 
-  // Get settings with preference for config values
+  // Get settings by merging defaults with provided config and individual props
   const settings = useMemo(() => {
+    // Start with default config
+    const mergedConfig = { ...DEFAULT_CONFIG };
+
+    // Override with processed config if available
+    if (processedConfig) {
+      // Merge top level
+      if (processedConfig.variant) mergedConfig.variant = processedConfig.variant;
+
+      // Merge file constraints
+      if (processedConfig.fileConstraints) {
+        mergedConfig.fileConstraints = {
+          ...mergedConfig.fileConstraints,
+          ...processedConfig.fileConstraints,
+        };
+      }
+
+      // Merge style preset
+      if (processedConfig.stylePreset) {
+        mergedConfig.stylePreset = {
+          ...mergedConfig.stylePreset,
+          ...processedConfig.stylePreset,
+          // Handle nested customColors separately
+          customColors: {
+            ...mergedConfig?.stylePreset?.customColors,
+            ...processedConfig.stylePreset.customColors,
+          },
+        };
+      }
+
+      // Merge text content
+      if (processedConfig.text) {
+        mergedConfig.text = {
+          ...mergedConfig.text,
+          ...processedConfig.text,
+        };
+      }
+    }
+
+    // Override with individual props if provided
     return {
       // Variant settings
-      variant: processedConfig?.variant || variant || "dropzone",
+      variant: variant || mergedConfig.variant,
 
       // File constraints
-      maxSizeInMB: processedConfig?.fileConstraints?.maxSizeInMB || maxSizeInMB,
-      accept: processedConfig?.fileConstraints?.acceptedTypes || accept,
-      multiple: processedConfig?.fileConstraints?.multiple ?? multiple,
+      maxSizeInMB: maxSizeInMB || mergedConfig?.fileConstraints?.maxSizeInMB,
+      accept: accept || mergedConfig?.fileConstraints?.acceptedTypes,
+      multiple: multiple ?? mergedConfig?.fileConstraints?.multiple,
 
       // Style presets
-      size: processedConfig?.stylePreset?.size || size || "md",
-      radius: processedConfig?.stylePreset?.radius || radius,
-      borderStyle: processedConfig?.stylePreset?.borderStyle || borderStyle,
-      iconPlacement:
-        processedConfig?.stylePreset?.iconPlacement || iconPlacement,
-      iconSize: processedConfig?.stylePreset?.iconSize || iconSize,
-      colorScheme: processedConfig?.stylePreset?.theme || colorScheme,
-      customColors: processedConfig?.stylePreset?.customColors || customColors,
-      padding: processedConfig?.stylePreset?.padding || padding,
+      size: size || mergedConfig?.stylePreset?.size,
+      radius: radius || mergedConfig?.stylePreset?.radius,
+      borderStyle: borderStyle || mergedConfig?.stylePreset?.borderStyle,
+      iconPlacement: iconPlacement || mergedConfig?.stylePreset?.iconPlacement,
+      iconSize: iconSize || mergedConfig?.stylePreset?.iconSize,
+      colorScheme: colorScheme || mergedConfig?.stylePreset?.theme,
+      customColors: customColors || mergedConfig?.stylePreset?.customColors,
+      padding: padding || mergedConfig?.stylePreset?.padding,
 
       // Text content
-      title: processedConfig?.text?.title || title,
-      buttonText: processedConfig?.text?.buttonText || buttonText,
-      dragDropText:
-        processedConfig?.text?.dragDropText ||
-        "Click to upload or drag and drop",
-      maxFileSizeText:
-        processedConfig?.text?.maxFileSizeText ||
-        `Maximum file size: ${
-          processedConfig?.fileConstraints?.maxSizeInMB || maxSizeInMB
-        }MB`,
-      removeFileText: processedConfig?.text?.removeFileText || "Remove file",
-      previewText: processedConfig?.text?.previewText || "Preview:",
-      errorSizeExceeded:
-        processedConfig?.text?.errorSizeExceeded ||
-        `File size must be less than ${
-          processedConfig?.fileConstraints?.maxSizeInMB || maxSizeInMB
-        }MB`,
-      filesCountText: processedConfig?.text?.filesCountText || "Files",
+      title: title || mergedConfig?.text?.title,
+      buttonText: buttonText || mergedConfig?.text?.buttonText,
+      dragDropText: mergedConfig?.text?.dragDropText,
+      maxFileSizeText: mergedConfig?.text?.maxFileSizeText?.replace(
+        "5MB",
+        `${maxSizeInMB || mergedConfig?.fileConstraints?.maxSizeInMB}MB`
+      ) || `Maximum file size: ${maxSizeInMB || mergedConfig?.fileConstraints?.maxSizeInMB}MB`,
+      removeFileText: mergedConfig?.text?.removeFileText,
+      previewText: mergedConfig?.text?.previewText,
+      errorSizeExceeded: mergedConfig?.text?.errorSizeExceeded?.replace(
+        "5MB",
+        `${maxSizeInMB || mergedConfig?.fileConstraints?.maxSizeInMB}MB`
+      ) || `File size must be less than ${maxSizeInMB || mergedConfig?.fileConstraints?.maxSizeInMB}MB`,
+      filesCountText: mergedConfig?.text?.filesCountText,
     };
   }, [
     processedConfig,
@@ -120,7 +184,7 @@ export const FileUpload = ({
 
   // Convert accept string to object format for react-dropzone
   const getAcceptFormat = () => {
-    if (settings.accept === "*/*") return {};
+    if (!settings.accept || settings.accept === "*/*") return {};
 
     const acceptObj: Record<string, string[]> = {};
     settings.accept.split(",").forEach((type) => {
@@ -153,7 +217,7 @@ export const FileUpload = ({
 
       // Check file size
       const oversizedFiles = acceptedFiles.filter(
-        (file) => file.size > settings.maxSizeInMB * 1024 * 1024
+        (file) => file.size > (settings?.maxSizeInMB ? settings.maxSizeInMB * 1024 * 1024 : 0)
       );
 
       if (oversizedFiles.length > 0) {
@@ -267,7 +331,7 @@ export const FileUpload = ({
   } = useDropzone({
     onDrop,
     accept: getAcceptFormat(),
-    maxSize: settings.maxSizeInMB * 1024 * 1024,
+    maxSize: settings?.maxSizeInMB ? settings.maxSizeInMB * 1024 * 1024 : undefined,
     multiple: settings.multiple,
   });
 
@@ -281,7 +345,7 @@ export const FileUpload = ({
         const file = uploadedFiles[0];
 
         // Check file size
-        if (file.size > settings.maxSizeInMB * 1024 * 1024) {
+        if (file.size > (settings?.maxSizeInMB ? settings.maxSizeInMB * 1024 * 1024 : 0)) {
           setError(settings.errorSizeExceeded);
           return;
         }
@@ -473,7 +537,7 @@ export const FileUpload = ({
       md: "rounded-md",
       lg: "rounded-lg",
       full: "rounded-full",
-    }[settings.radius];
+    }[settings.radius ?? "md"];
 
     // Border style
     const borderStyles = {
@@ -481,21 +545,21 @@ export const FileUpload = ({
       dashed: "border-dashed",
       dotted: "border-dotted",
       none: "border-none",
-    }[settings.borderStyle];
+    }[settings.borderStyle ?? "dashed"];
 
     // Padding
     const paddingStyles = {
       sm: "p-2",
       md: "p-4",
       lg: "p-6",
-    }[settings.padding];
+    }[settings.padding ?? "md"];
 
     // Icon size
     const iconSizeStyles = {
       sm: "w-6 h-6",
       md: "w-8 h-8",
       lg: "w-10 h-10",
-    }[settings.iconSize];
+    }[settings.iconSize ?? "md"];
 
     // Color scheme
     const isDark =
@@ -539,7 +603,7 @@ export const FileUpload = ({
       left: "flex-row",
       right: "flex-row-reverse",
       top: "flex-col",
-    }[settings.iconPlacement];
+    }[settings.iconPlacement ?? "top"];
 
     return (
       <div className={`flex items-center ${flexDirection} gap-2`}>
@@ -872,7 +936,7 @@ export const FileUpload = ({
     return (
       <div className={cn(fileUploadVariants({ variant, size }), className)}>
         <label className="cursor-pointer flex flex-col items-center">
-          <div className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded transition-colors">
+          <div className={`${themeStyles.colors.primary} ${themeStyles.radiusStyles} font-medium py-2 px-4 transition-colors`}>
             {settings.buttonText}
           </div>
           <input
